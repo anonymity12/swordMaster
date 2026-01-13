@@ -124,6 +124,47 @@
         #loading.hidden {
             display: none;
         }
+        
+        /* 剑云健康条 */
+        #health-bars {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        .health-bar-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .health-label {
+            color: #7eb8da;
+            font-size: 12px;
+            width: 50px;
+            margin-right: 10px;
+        }
+        .health-bar {
+            width: 150px;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #2a5a8a;
+        }
+        .health-bar.blue .health-fill {
+            background: linear-gradient(90deg, #2266cc, #4488ff);
+            box-shadow: 0 0 10px #4488ff;
+        }
+        .health-bar.red .health-fill {
+            background: linear-gradient(90deg, #cc2222, #ff4444);
+            box-shadow: 0 0 10px #ff4444;
+        }
+        .health-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
@@ -138,6 +179,22 @@
     <div id="status-section">
         <button id="status-btn">Searching for Qi (Hand)...</button>
         <span id="camera-toggle">Show Camera</span>
+    </div>
+    
+    <!-- 剑云健康条 -->
+    <div id="health-bars">
+        <div class="health-bar-container">
+            <span class="health-label">蓝剑云</span>
+            <div class="health-bar blue">
+                <div id="health-bar-1" class="health-fill"></div>
+            </div>
+        </div>
+        <div class="health-bar-container">
+            <span class="health-label">红剑云</span>
+            <div class="health-bar red">
+                <div id="health-bar-2" class="health-fill"></div>
+            </div>
+        </div>
     </div>
     
     <!-- 右下角摄像头预览 -->

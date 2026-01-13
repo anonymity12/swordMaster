@@ -29,14 +29,20 @@ export class HandTracker {
         }
     }
 
-    updateStatusUI(detected) {
+    updateStatusUI(detected, handCount = 0) {
         const statusBtn = document.getElementById('status-btn');
         if (statusBtn) {
-            if (detected) {
-                statusBtn.textContent = 'Qi Detected (Hand Found)';
+            if (detected && handCount > 0) {
+                if (handCount === 2) {
+                    statusBtn.textContent = 'Dual Qi Detected (2 Hands)';
+                    statusBtn.style.borderColor = '#9a6a4a';
+                    statusBtn.style.color = '#d8a07e';
+                } else {
+                    statusBtn.textContent = 'Qi Detected (1 Hand)';
+                    statusBtn.style.borderColor = '#4a9a6a';
+                    statusBtn.style.color = '#7ed8a0';
+                }
                 statusBtn.classList.remove('detecting');
-                statusBtn.style.borderColor = '#4a9a6a';
-                statusBtn.style.color = '#7ed8a0';
             } else {
                 statusBtn.textContent = 'Searching for Qi (Hand)...';
                 statusBtn.classList.add('detecting');
@@ -57,7 +63,7 @@ export class HandTracker {
         });
 
         this.hands.setOptions({
-            maxNumHands: 1,
+            maxNumHands: 2,  // 支持检测两只手
             modelComplexity: 1,
             minDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5
@@ -90,38 +96,47 @@ export class HandTracker {
     onResults(results) {
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
             // 更新 UI 状态为已检测到手
-            this.updateStatusUI(true);
+            this.updateStatusUI(true, results.multiHandLandmarks.length);
             
-            // Get the first detected hand
-            const landmarks = results.multiHandLandmarks[0];
+            const detectedHands = [];
             
-            // Get the palm base (wrist) and index finger tip
-            const wrist = landmarks[0];
-            const indexTip = landmarks[8];
+            // 遍历所有检测到的手（最多2只）
+            for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+                const landmarks = results.multiHandLandmarks[i];
+                
+                // Get the palm base (wrist) and index finger tip
+                const wrist = landmarks[0];
+                const indexTip = landmarks[8];
+                
+                // Calculate the center between wrist and index finger tip
+                const handX = (wrist.x + indexTip.x) / 2;
+                const handY = (wrist.y + indexTip.y) / 2;
+                
+                // 获取手的类型（左手或右手）
+                const handedness = results.multiHandedness[i];
+                const isLeftHand = handedness.label === 'Left';
+                
+                // Calculate confidence
+                const confidence = handedness.score || 0.5;
+                
+                // Normalize coordinates to screen space
+                // 注意：摄像头画面是镜像的，所以需要翻转 X 坐标 (1 - handX)
+                const screenX = (1 - handX) * window.innerWidth;
+                const screenY = handY * window.innerHeight;
+                
+                detectedHands.push({ 
+                    x: screenX, 
+                    y: screenY,
+                    confidence: confidence,
+                    isLeftHand: isLeftHand,
+                    handIndex: i
+                });
+            }
             
-            // Calculate the center between wrist and index finger tip
-            const handX = (wrist.x + indexTip.x) / 2;
-            const handY = (wrist.y + indexTip.y) / 2;
-            
-            // Calculate confidence (average of detection and tracking confidence)
-            const confidence = (
-                (results.multiHandedness[0].score || 0.5) * 
-                (results.multiHandWorldLandmarks ? 1.0 : 0.8)
-            );
-            
-            // Normalize coordinates to screen space
-            // 注意：摄像头画面是镜像的，所以需要翻转 X 坐标 (1 - handX)
-            const screenX = (1 - handX) * window.innerWidth;
-            const screenY = handY * window.innerHeight;
-            
-            this.onHandsDetected([{ 
-                x: screenX, 
-                y: screenY,
-                confidence: confidence
-            }]);
+            this.onHandsDetected(detectedHands);
         } else {
             // 更新 UI 状态为未检测到手
-            this.updateStatusUI(false);
+            this.updateStatusUI(false, 0);
             
             // No hands detected
             this.onHandsDetected([]);

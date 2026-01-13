@@ -83,26 +83,34 @@ class App {
     
     onHandsDetected(hands) {
         if (hands.length > 0) {
-            const hand = hands[0];
-            // Convert screen coordinates to 3D world coordinates
-            const vector = new THREE.Vector3(
-                (hand.x / window.innerWidth) * 2 - 1,
-                -(hand.y / window.innerHeight) * 2 + 1,
-                0.5 // Z value between 0.0 and 1.0
-            );
+            // 将所有检测到的手转换为 3D 坐标
+            const handTargets = hands.map(hand => {
+                // Convert screen coordinates to 3D world coordinates
+                const vector = new THREE.Vector3(
+                    (hand.x / window.innerWidth) * 2 - 1,
+                    -(hand.y / window.innerHeight) * 2 + 1,
+                    0.5 // Z value between 0.0 and 1.0
+                );
+                
+                // Unproject the 2D point to 3D space
+                vector.unproject(this.camera);
+                
+                // Calculate direction from camera to the point in world space
+                const dir = vector.sub(this.camera.position).normalize();
+                
+                // Calculate position along the direction vector (scaled by distance)
+                const distance = 10; // Fixed distance from camera
+                const targetPosition = this.camera.position.clone().add(dir.multiplyScalar(distance));
+                
+                return {
+                    position: targetPosition,
+                    isLeftHand: hand.isLeftHand,
+                    handIndex: hand.handIndex
+                };
+            });
             
-            // Unproject the 2D point to 3D space
-            vector.unproject(this.camera);
-            
-            // Calculate direction from camera to the point in world space
-            const dir = vector.sub(this.camera.position).normalize();
-            
-            // Calculate position along the direction vector (scaled by distance)
-            const distance = 10; // Fixed distance from camera
-            const targetPosition = this.camera.position.clone().add(dir.multiplyScalar(distance));
-            
-            // Update sword swarm target
-            this.swordSwarm.setTarget(targetPosition);
+            // Update sword swarm with all hand targets
+            this.swordSwarm.setTargets(handTargets);
         } else {
             // No hands detected, reset target
             this.swordSwarm.resetTarget();
@@ -121,8 +129,25 @@ class App {
         // Update sword swarm
         this.swordSwarm.update();
         
+        // Update health bars UI
+        this.updateHealthBars();
+        
         // Render the scene
         this.renderer.render(this.scene, this.camera);
+    }
+    
+    updateHealthBars() {
+        const health = this.swordSwarm.getHealthStatus();
+        
+        const healthBar1 = document.getElementById('health-bar-1');
+        const healthBar2 = document.getElementById('health-bar-2');
+        
+        if (healthBar1) {
+            healthBar1.style.width = `${health.cloud1 * 100}%`;
+        }
+        if (healthBar2) {
+            healthBar2.style.width = `${health.cloud2 * 100}%`;
+        }
     }
 }
 
