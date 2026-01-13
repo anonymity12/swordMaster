@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>御剑术 - 万剑归宗</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body { 
+            overflow: hidden; 
+            background-color: #0a1628;
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        }
+        
+        /* 左上角标题区域 */
+        #title-section {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #7eb8da;
+            z-index: 100;
+            pointer-events: none;
+        }
+        #title-section h1 {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+        #title-section .subtitle {
+            font-size: 14px;
+            color: #5a8aa8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        #title-section .description {
+            font-size: 13px;
+            color: #4a7a98;
+            max-width: 280px;
+            line-height: 1.5;
+        }
+        
+        /* 右上角状态区域 */
+        #status-section {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            text-align: right;
+        }
+        #status-btn {
+            background: linear-gradient(135deg, #1a3a5c 0%, #0d2840 100%);
+            border: 1px solid #2a5a8a;
+            color: #7eb8da;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        #status-btn:hover {
+            background: linear-gradient(135deg, #2a4a6c 0%, #1d3850 100%);
+            border-color: #4a7aaa;
+        }
+        #status-btn.detecting {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        #camera-toggle {
+            display: block;
+            margin-top: 8px;
+            color: #4a7a98;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #camera-toggle:hover {
+            color: #7eb8da;
+        }
+        
+        /* 右下角摄像头预览 */
+        #camera-preview {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 160px;
+            height: 120px;
+            border: 2px solid #2a5a8a;
+            border-radius: 4px;
+            overflow: hidden;
+            z-index: 100;
+            background: #000;
+        }
+        #camera-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* 镜像显示 */
+        }
+        #camera-preview.hidden {
+            display: none;
+        }
+        
+        /* 加载界面 */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #7eb8da;
+            font-size: 18px;
+            text-align: center;
+            z-index: 200;
+        }
+        #loading.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左上角标题 -->
+    <div id="title-section">
+        <h1>御剑术</h1>
+        <div class="subtitle">Ten Thousand Swords Return to Origin</div>
+        <div class="description">Raise your hand to the camera to command the swarm.</div>
+    </div>
+    
+    <!-- 右上角状态 -->
+    <div id="status-section">
+        <button id="status-btn">Searching for Qi (Hand)...</button>
+        <span id="camera-toggle">Show Camera</span>
+    </div>
+    
+    <!-- 右下角摄像头预览 -->
+    <div id="camera-preview" class="hidden">
+        <video id="camera-video" autoplay playsinline></video>
+    </div>
+    
+    <!-- 加载界面 -->
+    <div id="loading">加载中，请稍候...</div>
+    
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
